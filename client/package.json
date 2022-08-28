@@ -1,5 +1,6 @@
 {
-  "name": "starter-template",
+  "name": "chattie-web-client",
+  "description": "A MERN Stack realtime chatting app.",
   "author": {
     "name": "Samer A.",
     "website": "https://cleversamer.web.app"
