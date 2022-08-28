@@ -1,0 +1,38 @@
+.notfound-container {
+  display: grid;
+  place-items: center;
+  height: 500px;
+  font-size: 14px;
+  color: #303030;
+}
+
+.heading {
+  font-size: 3.33vw;
+  padding: 0 4vw;
+  text-align: center;
+}
+
+.link {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 2vw !important;
+  font-weight: 500;
+  color: #1e90ff;
+  text-decoration: underline !important;
+}
+
+.link:hover,
+.link:active {
+  color: #303030;
+}
+
+@media screen and (max-width: 768px) {
+  .heading {
+    font-size: 6vw !important;
+  }
+
+  .link {
+    font-size: 4.5vw !important;
+  }
+}

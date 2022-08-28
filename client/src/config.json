@@ -1,0 +1,8 @@
+{
+  "routes": {
+    "client": {
+      "home": "/home",
+      "notFound": "/not-found"
+    }
+  }
+}
