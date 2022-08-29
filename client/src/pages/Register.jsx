@@ -3,66 +3,39 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import config from "config.json";
+import auth from "api/auth";
 
 const Register = () => {
   const [values, setValues] = useState({
     username: "",
-    email: "",
     password1: "",
     password2: "",
     error: "",
   });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const isValid = handleValidation();
-    if (!isValid) {
-      return;
-    }
+  const handleSubmit = async (e) => {
+    try {
+      e.preventDefault();
 
-    alert("Registers successfully.");
-    // Calling the server...
-    clearForm();
+      // Calling the server...
+      const { username, email, password1: password } = values;
+      const { data } = await auth.register(username, email, password);
+      console.log(data);
+
+      clearForm();
+    } catch (err) {
+      console.log(err);
+      setError(err.response.data.message);
+    }
   };
 
   const clearForm = () =>
     setValues({
       username: "",
-      email: "",
       password1: "",
       password2: "",
       error: "",
     });
-
-  const handleValidation = () => {
-    const { username, email, password1, password2 } = values;
-    if (!username || !email || !password1 || !password2) {
-      setError("Invalid user registration info.");
-      return false;
-    }
-
-    if (password1 !== password2) {
-      setError("Passwords should be equal.");
-      return false;
-    }
-
-    if (password1.length < 8 || password1.length > 32) {
-      setError("Password should be (8 ~ 32) characters length.");
-      return false;
-    }
-
-    if (username.length < 3 || username.length > 32) {
-      setError("Username should be (3 ~ 32) characters length.");
-      return false;
-    }
-
-    if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
-      setError("Invalid email address.");
-      return false;
-    }
-
-    return true;
-  };
 
   const setError = (error) => setValues({ ...values, error });
 
@@ -82,13 +55,6 @@ const Register = () => {
           placeholder="Username"
           type="text"
           value={values.username}
-        />
-
-        <Input
-          onChange={handleFieldChange("email")}
-          placeholder="Email"
-          type="text"
-          value={values.email}
         />
 
         <Input
@@ -152,7 +118,8 @@ const Form = styled.form`
   flex-direction: column;
   gap: 15px;
   padding: 30px 50px;
-  /* max-width: 350px; */
+  width: 350px;
+  max-width: 350px;
 `;
 
 const Brand = styled.div`
@@ -247,6 +214,7 @@ const Error = styled.span`
   color: #f00;
   font-size: 13px;
   text-align: center;
+  width: 100%;
 `;
 
 export default Register;
