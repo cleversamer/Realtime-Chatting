@@ -1,13 +1,13 @@
 const passport = require("passport");
 const { ApiError } = require("./apiError");
 const httpStatus = require("http-status");
-const config = require("../config.json");
-const { roles } = require("../config/roles");
+const errors = require("../config/errors");
+const roles = require("../config/roles");
 
 const verify = (req, res, resolve, reject, rights) => async (err, user) => {
   if (err || !user) {
     const statusCode = httpStatus.UNAUTHORIZED;
-    const message = config.errors.invalidToken;
+    const message = errors.invalidToken;
     return reject(new ApiError(statusCode, message));
   }
 
@@ -20,7 +20,7 @@ const verify = (req, res, resolve, reject, rights) => async (err, user) => {
 
     if (!permission.granted) {
       const statusCode = httpStatus.FORBIDDEN;
-      const message = config.errors.hasNoRights;
+      const message = errors.hasNoRights;
       return reject(new ApiError(statusCode, message));
     }
 
