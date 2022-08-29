@@ -1,210 +1,163 @@
-/* eslint-disable react/jsx-no-target-blank */
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import styled from "styled-components";
-import config from "config.json";
-import auth from "api/auth";
+import { useNavigate, Link } from "react-router-dom";
+import Logo from "../assets/logo.svg";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { loginRoute } from "../utils/APIRoutes";
 
-const Register = () => {
-  const [values, setValues] = useState({
-    username: "",
-    password: "",
-    error: "",
-  });
+export default function Login() {
+  const navigate = useNavigate();
+  const [values, setValues] = useState({ username: "", password: "" });
+  const toastOptions = {
+    position: "bottom-right",
+    autoClose: 8000,
+    pauseOnHover: true,
+    draggable: true,
+    theme: "dark",
+  };
+  useEffect(() => {
+    if (localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)) {
+      navigate("/");
+    }
+  }, []);
 
-  const handleSubmit = async (e) => {
-    try {
-      e.preventDefault();
+  const handleChange = (event) => {
+    setValues({ ...values, [event.target.name]: event.target.value });
+  };
 
-      // Calling the server...
+  const validateForm = () => {
+    const { username, password } = values;
+    if (username === "") {
+      toast.error("Email and Password is required.", toastOptions);
+      return false;
+    } else if (password === "") {
+      toast.error("Email and Password is required.", toastOptions);
+      return false;
+    }
+    return true;
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (validateForm()) {
       const { username, password } = values;
-      const { data } = await auth.login(username, password);
-      console.log(data);
+      const { data } = await axios.post(loginRoute, {
+        username,
+        password,
+      });
+      if (data.status === false) {
+        toast.error(data.msg, toastOptions);
+      }
+      if (data.status === true) {
+        localStorage.setItem(
+          process.env.REACT_APP_LOCALHOST_KEY,
+          JSON.stringify(data.user)
+        );
 
-      clearForm();
-    } catch (err) {
-      setError(err.response?.data?.message || err.message);
+        navigate("/");
+      }
     }
   };
 
-  const clearForm = () =>
-    setValues({
-      username: "",
-      password: "",
-      error: "",
-    });
-
-  const setError = (error) => setValues({ ...values, error });
-
-  const handleFieldChange = (key) => (e) =>
-    setValues({ ...values, [key]: e.currentTarget.value, error: "" });
-
   return (
-    <Container>
-      <Form onSubmit={handleSubmit}>
-        <Brand>
-          <Image src="/assets/icons/logo.svg" alt="chattie's logo" />
-          <Heading>Chattie</Heading>
-        </Brand>
-
-        <Input
-          onChange={handleFieldChange("username")}
-          placeholder="Username"
-          type="text"
-          value={values.username}
-        />
-
-        <InputContainer>
-          <Input
-            onChange={handleFieldChange("password")}
-            placeholder="Password"
-            type="password"
-            value={values.password}
+    <>
+      <FormContainer>
+        <form action="" onSubmit={(event) => handleSubmit(event)}>
+          <div className="brand">
+            <img src={Logo} alt="logo" />
+            <h1>snappy</h1>
+          </div>
+          <input
+            type="text"
+            placeholder="Username"
+            name="username"
+            onChange={(e) => handleChange(e)}
+            min="3"
           />
-
-          {values.error && <Error>{values.error}</Error>}
-        </InputContainer>
-
-        <BtnSubmit type="submit">Register</BtnSubmit>
-
-        <NavigationText>
-          Already have an account?{" "}
-          <Link to={config.routes.client.register}>Register.</Link>
-        </NavigationText>
-      </Form>
-
-      <Copyrights>
-        &copy; 2022{" "}
-        <a href="https://cleversamer.web.app/" target="_blank">
-          Samer Al-Sa'dawi.
-        </a>{" "}
-        All rights reserved.
-      </Copyrights>
-    </Container>
+          <input
+            type="password"
+            placeholder="Password"
+            name="password"
+            onChange={(e) => handleChange(e)}
+          />
+          <button type="submit">Log In</button>
+          <span>
+            Don't have an account ? <Link to="/register">Create One.</Link>
+          </span>
+        </form>
+      </FormContainer>
+      <ToastContainer />
+    </>
   );
-};
+}
 
-const Container = styled.div`
+const FormContainer = styled.div`
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1rem;
   align-items: center;
   background-color: #131324;
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
-  height: 100vh;
-  justify-content: center;
-`;
-
-const InputContainer = styled.div`
-  max-width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-`;
-
-const Form = styled.form`
-  background-color: rgba(0, 0, 0, 0.463);
-  border-radius: 30px;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  padding: 30px 50px;
-  width: 350px;
-  max-width: 350px;
-`;
-
-const Brand = styled.div`
-  align-items: center;
-  display: flex;
-  gap: 15px;
-  justify-content: center;
-  margin-bottom: 10px;
-`;
-
-const Image = styled.img`
-  height: 42px;
-`;
-
-const Heading = styled.h1`
-  color: #fff;
-  text-transform: capitalize;
-`;
-
-const Input = styled.input`
-  background-color: transparent;
-  border-radius: 5px;
-  border: 1.3px solid #4e0eff;
-  color: #fff;
-  font-size: 14px;
-  padding: 10px 15px;
-  transition-duration: 176ms;
-  width: 100%;
-
-  ::placeholder {
-    font-size: 14px;
-    font-weight: 600;
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    justify-content: center;
+    img {
+      height: 5rem;
+    }
+    h1 {
+      color: white;
+      text-transform: uppercase;
+    }
   }
 
-  :focus {
-    border-color: #997af0;
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    background-color: #00000076;
+    border-radius: 2rem;
+    padding: 5rem;
   }
-`;
-
-const BtnSubmit = styled.button`
-  background-color: #997af0;
-  border-radius: 5px;
-  color: #fff;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  height: 38px;
-  text-transform: uppercase;
-  transition-duration: 176ms;
-
-  :hover {
+  input {
+    background-color: transparent;
+    padding: 1rem;
+    border: 0.1rem solid #4e0eff;
+    border-radius: 0.4rem;
+    color: white;
+    width: 100%;
+    font-size: 1rem;
+    &:focus {
+      border: 0.1rem solid #997af0;
+      outline: none;
+    }
+  }
+  button {
     background-color: #4e0eff;
+    color: white;
+    padding: 1rem 2rem;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 0.4rem;
+    font-size: 1rem;
+    text-transform: uppercase;
+    &:hover {
+      background-color: #4e0eff;
+    }
   }
-
-  :active {
-    transform: scale(0.96);
-  }
-`;
-
-const NavigationText = styled.span`
-  color: #fff;
-  font-size: 15px;
-  margin-top: 15px;
-
-  > a {
-    color: #997af0;
-    transition-duration: 176ms;
-
-    :hover {
+  span {
+    color: white;
+    text-transform: uppercase;
+    a {
       color: #4e0eff;
+      text-decoration: none;
+      font-weight: bold;
     }
   }
 `;
-
-const Copyrights = styled.span`
-  color: #eee;
-  font-size: 15px;
-  text-transform: capitalize;
-
-  a {
-    color: #997af0;
-    text-decoration: underline;
-    transition-duration: 176ms;
-
-    :hover {
-      color: #4e0eff;
-    }
-  }
-`;
-
-const Error = styled.span`
-  color: #f00;
-  font-size: 13px;
-  text-align: center;
-  width: 100%;
-`;
-
-export default Register;
