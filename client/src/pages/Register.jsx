@@ -18,8 +18,8 @@ const Register = () => {
       e.preventDefault();
 
       // Calling the server...
-      const { username, email, password1: password } = values;
-      const { data } = await auth.register(username, email, password);
+      const { username, password1: password } = values;
+      const { data } = await auth.register(username, password);
       console.log(data);
 
       clearForm();
